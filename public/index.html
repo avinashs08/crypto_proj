@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CNS Security Suite: Weak Auth Attacks vs Strong Auth (Kerberos & PKI)</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo-group">
+      <div class="shield-icon">🛡️</div>
+      <div class="header-text">
+        <h1>Cryptography & Network Security Engineering Platform</h1>
+        <p>Real-Life Demonstration: Weak Authentication Attack Simulation vs. Strong Authentication (Kerberos & PKI/mTLS)</p>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-cyan" id="stat-kdc">KDC: Active</span>
+      <span class="badge badge-emerald" id="stat-ca">Root CA: Active</span>
+      <span class="badge badge-purple">PO3, PO5, PO7, PO8, PSO2</span>
+      <span class="badge badge-amber">SDG 4 & SDG 9</span>
+    </div>
+  </header>
+
+  <!-- NAVIGATION TABS -->
+  <nav class="tabs-container">
+    <button class="tab-btn active" data-tab="tab-weak">
+      <span>⚠️</span> Weak Auth Attack Lab
+    </button>
+    <button class="tab-btn" data-tab="tab-kerberos">
+      <span>🔑</span> Kerberos Protocol Lab
+    </button>
+    <button class="tab-btn" data-tab="tab-pki">
+      <span>📜</span> PKI & mTLS Lab
+    </button>
+    <button class="tab-btn" data-tab="tab-compare">
+      <span>📊</span> Comparative Benchmark
+    </button>
+    <button class="tab-btn" data-tab="tab-outcomes">
+      <span>🎓</span> POs, SDGs & Viva Prep
+    </button>
+  </nav>
+
+  <!-- TAB 1: WEAK AUTH ATTACK SIMULATION -->
+  <section id="tab-weak" class="tab-content active">
+    <div class="alert alert-danger">
+      <div>
+        <strong>Vulnerability Warning:</strong> Unencrypted authentication, unsalted hashing, and missing nonces leave systems exposed to CWE-319 (Cleartext Transmission), CWE-294 (Replay Attack), and CWE-327 (Broken Crypto).
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Client & Weak Server -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span>👤</span> Victim Client: Alice (Insecure HTTP/Auth)</div>
+          <span class="badge badge-rose">Cleartext Port 80</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" id="weak-username" class="form-input" value="alice">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="weak-password" class="form-input" value="password123">
+        </div>
+
+        <div class="action-bar">
+          <button id="btn-weak-login" class="btn btn-cyan">Log in via Weak Auth</button>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <label class="form-label">Active Captured Bearer Token</label>
+          <div id="captured-token-display" class="form-input" style="color: #fbbf24;">(None yet - click login)</div>
+        </div>
+
+        <div style="margin-top: 14px;">
+          <label class="form-label">Client Network Log</label>
+          <div id="log-weak-client" class="terminal-window"></div>
+        </div>
+      </div>
+
+      <!-- Attacker Console (Eve / Mallory) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span>🕵️</span> Adversary Station: Eve (Wireshark / Replay Engine)</div>
+          <span class="badge badge-amber">Man-in-the-Middle</span>
+        </div>
+
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+          Simulate real-world attacks executed against the vulnerable authentication channel:
+        </p>
+
+        <div class="action-bar">
+          <button id="wire-sniff-btn" class="btn btn-rose" disabled>
+            <span>📡</span> 1. Sniff & Harvest Credentials
+          </button>
+          <button id="wire-replay-btn" class="btn btn-rose" disabled>
+            <span>🔄</span> 2. Execute Replay Attack
+          </button>
+        </div>
+
+        <div style="margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+          <label class="form-label">3. Dictionary & Rainbow Table Hash Cracking</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="crack-target-hash" class="form-input" value="482c811da5d5b4bc6d497ffa98491e38" placeholder="MD5 Hash">
+            <button id="btn-crack-hash" class="btn btn-purple" style="white-space: nowrap;">Crack Hash</button>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px;">
+          <label class="form-label">Attacker Interception Log</label>
+          <div id="log-weak-attacker" class="terminal-window"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2: KERBEROS STRONG AUTHENTICATION -->
+  <section id="tab-kerberos" class="tab-content">
+    <div class="alert alert-info">
+      <div>
+        <strong>Kerberos v5 (RFC 4120):</strong> Strong enterprise single-sign-on using symmetric key cryptography (AES-256). Passwords are never sent across the network. Mutual authentication protects against impostors, and server timestamp replay caches eliminate replay attacks.
+      </div>
+    </div>
+
+    <!-- Sequence Stepper -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span>🔄</span> Kerberos 3-Way Exchange Architecture</div>
+        <span class="badge badge-cyan">Realm: CORP.ENTERPRISE.LOCAL</span>
+      </div>
+
+      <div class="protocol-stepper">
+        <div class="step-node active" id="krb-node-1">
+          <div class="step-circle">1</div>
+          <div class="step-label">AS-REQ / AS-REP</div>
+        </div>
+        <div class="step-node" id="krb-node-2">
+          <div class="step-circle">2</div>
+          <div class="step-label">TGS-REQ / TGS-REP</div>
+        </div>
+        <div class="step-node" id="krb-node-3">
+          <div class="step-circle">3</div>
+          <div class="step-label">AP-REQ / AP-REP (Mutual)</div>
+        </div>
+      </div>
+
+      <div class="action-bar" style="justify-content: center; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-right: 12px;">
+          <label class="form-label" style="margin: 0;">Target Service:</label>
+          <select id="krb-service-select" class="form-input" style="width: auto;">
+            <option value="fileserver/hr-records">fileserver/hr-records (HR Payroll)</option>
+            <option value="mailserver/corp">mailserver/corp (Enterprise Mail)</option>
+          </select>
+        </div>
+
+        <button id="btn-krb-step1" class="btn btn-cyan">1. Run AS Exchange (Get TGT)</button>
+        <button id="btn-krb-step2" class="btn btn-emerald" disabled>2. Run TGS Exchange (Get ST)</button>
+        <button id="btn-krb-step3" class="btn btn-purple" disabled>3. Run AP Exchange (Mutual Auth)</button>
+        <button id="btn-krb-replay-attack" class="btn btn-rose" disabled>💥 Test Attacker Replay on Kerberos</button>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <label class="form-label">Protocol Sequence & Cryptographic Trace</label>
+          <div id="log-krb-trace" class="terminal-window" style="height: 320px; max-height: 320px;"></div>
+        </div>
+
+        <div>
+          <label class="form-label">Why Kerberos Neutralizes Weak Auth Attacks</label>
+          <div class="packet-box" style="line-height: 1.7; font-size: 12px;">
+            <p><strong>1. Sniffing Immunity:</strong> Alice's password is never transmitted. Even the initial AS request does not contain the password; it only requests tickets.</p>
+            <p><strong>2. Ticket Opaqueness:</strong> The Ticket Granting Ticket (TGT) is encrypted with the KDC's private key ($K_{TGS}$). Alice cannot inspect or alter it.</p>
+            <p><strong>3. Mutual Authentication:</strong> The server replies with $E_{K_{C,S}}[\text{Timestamp} + 1]$, proving the server actually holds the secret key and isn't a rogue phishing server.</p>
+            <p><strong>4. Replay Cache (CWE-294 Defeated):</strong> Authenticators contain timestamps with a 5-minute skew tolerance. When Eve replays a sniffed ticket, the server looks up the timestamp in its replay cache and immediately throws <code>KRB_AP_ERR_REPEAT</code>!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: PKI & mTLS -->
+  <section id="tab-pki" class="tab-content">
+    <div class="alert alert-success">
+      <div>
+        <strong>Public Key Infrastructure (PKI) & Mutual TLS (mTLS):</strong> Zero-Trust cryptographic authentication using asymmetric 2048-bit RSA key pairs and X.509 digital certificates. Both client and server verify cryptographic trust chains down to the Root CA.
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Certificate Authority Console -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span>🏛️</span> Certificate Authority (Root CA) & CRL</div>
+          <span class="badge badge-emerald">RSA-2048 / SHA-256</span>
+        </div>
+
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+          Root CA signs Certificate Signing Requests (CSRs) and publishes the Certificate Revocation List (CRL).
+        </p>
+
+        <div class="action-bar">
+          <button id="btn-run-mtls" class="btn btn-emerald">
+            <span>🤝</span> Execute Mutual TLS (mTLS) Handshake
+          </button>
+          <button id="btn-revoke-cert" class="btn btn-rose">
+            <span>🚫</span> Revoke Client Certificate (CRL Test)
+          </button>
+          <button id="btn-reset-ca" class="btn btn-outline">
+            <span>🔄</span> Re-issue Root CA
+          </button>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <label class="form-label">Active Digital Certificates</label>
+          <div id="pki-cert-list"></div>
+        </div>
+      </div>
+
+      <!-- mTLS Handshake Console -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span>🔒</span> Zero-Trust mTLS Handshake & Tunnel Stream</div>
+          <span class="badge badge-cyan">TLS 1.3 Strict</span>
+        </div>
+
+        <label class="form-label">Handshake Transcript & Verification Steps</label>
+        <div id="log-pki-trace" class="terminal-window" style="height: 380px; max-height: 380px;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: COMPARATIVE BENCHMARK -->
+  <section id="tab-compare" class="tab-content">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span>📊</span> Comprehensive CNS Architectural Comparison Matrix</div>
+        <span class="badge badge-cyan">Academic Evaluation</span>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Evaluation Parameter</th>
+              <th>Weak Authentication</th>
+              <th>Kerberos v5 (Symmetric)</th>
+              <th>PKI / Mutual TLS (Asymmetric)</th>
+            </tr>
+          </thead>
+          <tbody id="comparison-tbody">
+            <!-- Dynamically populated from API -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 5: PROGRAM OUTCOMES & VIVA PREPARATION -->
+  <section id="tab-outcomes" class="tab-content">
+    <div class="grid-2">
+      <!-- Curriculum Alignment -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span>🎯</span> Program Outcomes (POs) & SDGs Mapping</div>
+          <span class="badge badge-purple">Academic Rubric</span>
+        </div>
+
+        <div style="font-size: 13px; line-height: 1.8;">
+          <p><strong>PO3: Design/Development of Solutions:</strong> Designed and implemented multi-stage protocol state machines for Kerberos (AS/TGS/AP) and PKI (CSR signing, X.509 verification, mTLS key agreement) that solve credential interception and token replay.</p>
+          <p><strong>PO5: Modern Tool Usage:</strong> Employs native hardware-accelerated cryptographic subsystems (Node.js crypto engine, AES-256-GCM, RSA-2048, SHA-256 HMAC), visual packet analyzers, and automated attack simulation frameworks.</p>
+          <p><strong>PO7: Environment and Sustainability:</strong> Compares computational energy footprints. Symmetric AES (Kerberos) consumes 100x fewer CPU cycles and kilowatt-hours than repeated RSA handshakes, demonstrating sustainable green security design.</p>
+          <p><strong>PO8: Ethics:</strong> Conducted offensive simulations (sniffing, replay, dictionary cracking) solely in isolated sandboxes to understand vulnerability mechanics and responsibly engineer zero-trust defenses.</p>
+          <p><strong>PSO2: Program Specific Outcome:</strong> Mastery over applied cryptography, distributed ticket issuance, public key certificates, and defense against network adversary models.</p>
+          <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 12px 0;">
+          <p><strong>SDG 4: Quality Education:</strong> Transforms abstract mathematical cryptographic theorems into tangible, interactive, step-by-step observable engineering workflows.</p>
+          <p><strong>SDG 9: Industry, Innovation, and Infrastructure:</strong> Fortifies enterprise IT networks, cloud APIs, and industrial cyber-physical infrastructure against hostile credential hijacking.</p>
+        </div>
+      </div>
+
+      <!-- Viva Voce Q&A -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span>🎓</span> Essential Viva Voce Questions & Answers</div>
+          <span class="badge badge-cyan">Defense Preparation</span>
+        </div>
+
+        <div style="font-size: 13px; line-height: 1.7; max-height: 480px; overflow-y: auto; padding-right: 8px;">
+          <div style="margin-bottom: 12px;">
+            <p style="color: #38bdf8;"><strong>Q1: Why is an HTTP Basic Auth token vulnerable to a replay attack?</strong></p>
+            <p style="color: var(--text-muted);">A: Weak tokens are static strings without embedded nonces, client bindings, or freshness timestamps. An attacker intercepting the token can re-transmit it at will, and the server cannot determine whether it originated from the legitimate user or an adversary.</p>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <p style="color: #38bdf8;"><strong>Q2: How does Kerberos prevent replay attacks?</strong></p>
+            <p style="color: var(--text-muted);">A: Kerberos requires an <em>Authenticator</em> containing the client's current timestamp encrypted with the session key. The server enforces a clock-skew window (typically $\pm 5$ minutes) and records all recently seen timestamps in a <em>Replay Cache</em>. If a duplicate authenticator is re-sent, the server rejects it with <code>KRB_AP_ERR_REPEAT</code>.</p>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <p style="color: #38bdf8;"><strong>Q3: What is the core difference between Kerberos and PKI?</strong></p>
+            <p style="color: var(--text-muted);">A: Kerberos relies on <em>symmetric key cryptography</em> and requires a centralized, continuously online Key Distribution Center (KDC). PKI relies on <em>asymmetric key pairs</em> and digital signatures; Root CAs can remain offline because certificates are mathematically self-verifiable using the CA's public key.</p>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <p style="color: #38bdf8;"><strong>Q4: What is Mutual TLS (mTLS) and how does it prevent Man-in-the-Middle?</strong></p>
+            <p style="color: var(--text-muted);">A: In standard TLS, only the server proves its identity. In mTLS, both client and server exchange X.509 digital certificates and prove ownership of their corresponding private keys via digital signatures (<code>CertificateVerify</code>). An eavesdropper or MITM lacks the private keys and cannot impersonate either party.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
+

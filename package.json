@@ -1,0 +1,22 @@
+{
+  "name": "cns-auth-security-suite",
+  "version": "1.0.0",
+  "description": "Cryptography and Network Security Real-Life Project: Weak Authentication Attack Simulation vs Strong Authentication (Kerberos & PKI/mTLS)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "cryptography",
+    "network-security",
+    "kerberos",
+    "pki",
+    "tls",
+    "weak-authentication",
+    "replay-attack",
+    "attack-simulation"
+  ],
+  "author": "Antigravity Engineering Pair",
+  "license": "MIT"
+}
